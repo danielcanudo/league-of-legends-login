@@ -1,5 +1,5 @@
 <h3 align="center">
-  Desafio 1: Praticando HTML, CSS e JavaScript
+  Desafio 2: Praticando HTML, CSS e JavaScript
 </h3>
 
 <p align="center">“Se algo é importante o suficiente, você deve tentar. Mesmo se o resultado provável for o fracasso.”!</p>
@@ -14,49 +14,55 @@ Desafio de projeto pessoal.
 
 Crie uma aplicação usando **HTML, CSS e JavaScript**.
 
-Neste desafio você irá recriar a tela de login do League of Legends com responsividade.
+Neste desafio você irá recriar toda a **Home Page da Tesla**.
 
 As informações contidas na aplicação são **estáticas** e não precisam refletir nenhuma API REST ou back-end.
 
 ### Tela da aplicação do resultado final:
 
-<img alt="Tela final da aplicação" src="https://danielcanudo.github.io/league-of-legends-login/tela-de-login-league-of-legends.png">
+<img alt="Tela final da aplicação" src="https://danielcanudo.github.io/tesla-home-page/imagens/tela-final-tesla-home-page.png">
 
 ### Componentes
 
-**index.html (HTML):** Parte responsável por todo o conteúdo em código HTML que foi criado no projeto, com uma tag 'main' principal e com 2 'section' dentro, em que a 1° 'section' é responsável pela parte do Login em si, e a 2° 'section' responsável pelo wallpaper que foi adicionado via CSS;
+**index.html (HTML):** Parte responsável por todo o conteúdo em código HTML que foi criado no projeto, com uma tag 'header' que comporta a logo e a navegação principal do site da Tesla, e depois com a tag 'aside', que comporta a barra de navegação que é ativada via JavaScript ao clicar em "Menu". Posterior a isso, temos a tag 'main' que apresenta o conteúdo principal da página e está dividido com 7 'section' dentro, em que cada uma é responsável por 1 dos produtos que está presente na Home Page da Tesla.
 
-**style.css (CSS):** Principal desafio do projeto passava pela parte de CSS, em que foram usados os conceitos de Flexbox para a estilização de toda a aplicação, além também de adicionar responsividade à parte da 'section' que continha a parte de login, através principalmente da função de CSS 'clamp()' aplicada à 'section' que continha o login e definindo um flex-grow de 1 para a 'section' responsável pela Wallpaper.
+**style.css (CSS):** Na parte de CSS foram usados os conceitos de Grid para a estilização da aplicação, além também da estilização da Barra de Navegação presente na tag 'aside', também foram adicionados via '@media' algumas funcionalidades para deixar o site mais responsivo e evitando problemas em telas de tamanhos diferentes.
 
-**script.js (JavaScript):** Responsável pelas animações nas tags de 'span' que acontecem ao clicar para preencher um "Nome de usuário" ou "Senha", além também da animação que habilita o botão que contém o botão com a seta para efetuar o login. Tudo isso foi feito através da criação de 'eventos' no JavaScript de 'focus' e 'focusout' que são responsáveis por habilitar e desabilitar a animação que ocorre com as tags de 'span' ao preencher os campos, e com o evento de 'input' que é responsável por habilitar o botão para a realização do Login. Todas essas animações foram construídas com a criação de objects e arrays. Segue abaixo o código citado em JavaScript:
+**nav.js (JavaScript):** Responsável pela parte da funcionalidade do Nav Bar (barra de navegação), fazendo com que seja adicionada a class: 'active' no 'backdrop' e no 'aside', ativando assim a estilização já realizada via CSS, assim como desativando também ao sair da Nav Bar.
+
+**scroll.js (JavaScript):** Responsável pela parte da animação de scroll que foi colocada ao se passar das 'section' do site, em que ao se rolar um pouco o scroll, ele faz um cálculo via função para entender se está subindo ou descendo e para onde ele deve ir, realizando uma transição entre as 'section'. Segue abaixo o código referente ao scroll.js:
 
 ```js
-const inputs = document.querySelectorAll('.input');
-const button = document.querySelector('.login_button');
+document.lastScrollPosition = 0;
+document.lastCentered = 0;
+document.onWayTo = null;
 
-const handleFocus = ({ target }) => {
-  const span = target.previousElementSibling;
-  span.classList.add('span_active');
-}
+document.addEventListener('scroll', () => {
+  const direction = window.pageYOffset - document.lastScrollPosition > 0 ? 'down' : 'up';
+  const sections = [...document.querySelectorAll('section')];
 
-const handleFocusOut = ({ target }) => {
-  if (target.value === '') {
-    const span = target.previousElementSibling;
-    span.classList.remove('span_active');
-  }
-}
-
-const handleChange = () => {
-    const [username, password] = inputs;
-  
-    if (username.value && password.value.length >= 8) {
-      button.removeAttribute('disabled');
-    } else {
-      button.setAttribute('disabled', '');
+  if (document.onWayTo === null) {
+    const destIndex = direction === 'up' ? document.lastCentered - 1 : document.lastCentered + 1;
+    if (destIndex >= 0 && destIndex < sections.length) {
+      console.log({destIndex,direction});
+      document.onWayTo = destIndex;
+      window.scroll(0, sections[destIndex].offsetTop);
     }
   }
 
-inputs.forEach((input) => input.addEventListener('focus', handleFocus));
-inputs.forEach((input) => input.addEventListener('focusout', handleFocusOut));
-inputs.forEach((input) => input.addEventListener('input', handleChange));
+
+  sections.forEach((section,index) => {
+    if (window.pageYOffset === section.offsetTop) {
+      document.lastCentered = index;
+      section.className = 'active';
+      if (document.onWayTo === index) {
+        document.onWayTo = null;
+      }
+    } else {
+      section.className = '';
+    }
+  })
+
+  document.lastScrollPosition = window.pageYOffset;
+})
 ```
